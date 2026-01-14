@@ -1,4 +1,4 @@
-# Risk-Aware Distributed BESS Coordination via ALADIN
+# Multi-Agent-Battery-Orchestration-Platform-with-Probabilistic-Risk-Hedging.
 
 This project implements a decentralized, risk-aware optimization framework for a **Virtual Power Plant (VPP)** consisting of Battery Energy Storage Systems (BESS). By leveraging the **ALADIN (Augmented Lagrangian based Alternating Direction Inexact Newton)** algorithm, the system coordinates multiple independent prosumers to achieve grid balance while explicitly managing market price uncertainty through **Conditional Value at Risk (CVaR)**.
 
