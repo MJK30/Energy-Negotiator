@@ -1,0 +1,8 @@
+.gamspy_venv/
+__pycache__/
+*.gdx
+*.log
+*.lst
+*.gams
+.venv/
+env/
