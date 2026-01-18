@@ -6,7 +6,7 @@ __pycache__/
 *.gams
 .venv/
 env/
-.png
-.jpg
-.pdf
-.docx
+*.png
+*.jpg
+*.pdf
+*.docx
