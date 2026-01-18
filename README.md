@@ -1,62 +1,75 @@
-# Risk-Aware Distributed BESS Coordination via ALADIN
+# The Energy Negotiator: Orchestrating Private Assets for Neighborhood Grid Harmony
 
-This project implements a decentralized, risk-aware optimization framework for a **Virtual Power Plant (VPP)** consisting of Battery Energy Storage Systems (BESS). By leveraging the **ALADIN (Augmented Lagrangian based Alternating Direction Inexact Newton)** algorithm, the system coordinates multiple independent prosumers to achieve grid balance while explicitly managing market price uncertainty through **Conditional Value at Risk (CVaR)**.
-
----
-
-## 1. Project Overview
-In modern energy markets, battery operators face significant financial risks due to price volatility. This project provides a technical solution that:
-1.  **Forecasts** market uncertainty using probabilistic quantile regression.
-2.  **Optimizes** local battery dispatch to maximize profit while "hedging" against tail risks.
-3.  **Coordinates** multiple batteries using a privacy-preserving distributed algorithm (ALADIN) to ensure collective grid stability without sharing sensitive local data.
+**"The Energy Negotiator"** is a decentralized, risk-aware optimization framework built with **GAMSPY**. It solves the "Duck Curve" challenge at the neighborhood level by coordinating independent energy agents—without compromising their privacy—to ensure local transformer stability and grid harmony.
 
 ---
 
-## 2. General Project Structure
-The repository is organized into a modular pipeline, separating data science tasks from optimization and control:
+## 1. Project Vision: Solving the Duck Curve
+Modern power grids face a fundamental mismatch between midday solar generation peaks and evening demand cycles. At the neighborhood level, when individual households optimize their batteries selfishly, they create synchronized power peaks that strain local infrastructure.
 
-| Directory/File | Purpose |
-| :--- | :--- |
-| `data/raw/` | Original ENTSO-E or synthetic market data. |
-| `data/processed/` | Quantile forecasts and clustered scenarios. |
-| `results/` | Visualizations (Risk bands, schedules, convergence). |
-| `src/data_ingress.py` | Phase I: Data fetching and synthetic generation. |
-| `src/forecasting.py` | Phase II: Probabilistic quantile regression. |
-| `src/scenarios.py` | Phase III: Sampling and K-Means reduction. |
-| `src/optimization.py` | Phase IV: Local Risk-Aware BESS (ALADIN Agent). |
-| `src/aggregator.py` | Phase V: Coupling Quadratic Program (ALADIN Master). |
-| `src/coordination.py` | Phase V: Main Orchestrator / ALADIN Loop. |
+This project implements a **Virtual Power Plant (VPP)** logic that acts as a "Market Negotiator," using shadow price signals to harmonize the behavior of diverse residents into a single, balanced community resource.
 
 ---
 
-## 3. Core Algorithms
+## 2. The Neighborhood Personas
+The system coordinates three distinct "Characters," each with unique economic motives and technical constraints:
 
-### **Conditional Value at Risk (CVaR)**
-To manage market uncertainty, the local agent uses CVaR to penalize the expected loss in the worst $\alpha\%$ (e.g., 5%) of scenarios.
-* **Loss Definition**: $Loss_s = Profit_{baseline} - Profit_s$.
-* **Optimization Goal**: $\max (E[Profit] - \lambda \cdot CVaR_{\alpha})$.
+| Persona | Asset | Capacity | Power Max | Risk Weight ($\beta$) | Role |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Baker (Solar)** | Solar + BESS | 2.0 kWh | 1.0 kW | 0.1 | The midday energy provider |
+| **Family (Tesla)** | Powerwall | 5.0 kWh | 2.5 kW | 0.7 | The risk-averse consumer |
+| **School (Battery)** | Industrial BESS | 20.0 kWh | 10.0 kW | 0.4 | The neighborhood anchor |
 
+![The Distributed Architecture](DISTRIBUTED.png)
 
+---
 
-### **ALADIN (Distributed Optimization)**
-ALADIN is used to solve the coordination problem by decomposing the global objective into local subproblems.
-* **Local Step**: Agents solve their own risk-aware profit maximization, including a dual price signal and a proximal penalty to ensure convergence.
-* **Consensus Step**: The aggregator solves a **Coupling Quadratic Program (QP)** to balance the total power mismatch across the community.
+## 3. Core Methodology
+
+### **The Negotiator (ADMM Aggregator)**
+Unlike centralized control systems, the Negotiator uses the **Alternating Direction Method of Multipliers (ADMM)**.
+- **Privacy First**: The central aggregator never sees private battery levels or household schedules.
+- **Iterative Consensus**: It issues "Shadow Prices" ($\lambda$) based on the neighborhood's current imbalance. Agents adjust their behavior until a perfect system balance is reached.
+
+### **Risk-Aware Agent Optimization (CVaR)**
+Each agent manages market uncertainty through **Conditional Value at Risk (CVaR)**.
+- **Objective**: $\max \quad (1-\beta) \mathbb{E}[\text{Profit}] + \beta \text{CVaR}_{\alpha}$
+- **$\beta$ (The Tuning Knob)**: Allows residents to choose their comfort level between aggressive profit-seeking (Baker) and conservative safety (Family).
+
+---
+
+## 4. Technical Architecture
+The repository follows a modular optimization pipeline:
+
+* `src/optimization.py`: Local agent models (Battery physics + CVaR + ADMM proximal terms).
+* `src/aggregator.py`: The master problem that calculates the neighborhood's coordination signal.
+* `src/coordination.py`: The main orchestrator that manages the iterative "Negotiation" loop.
+* `src/postprocessing.py`: Generates  visuals for results analysis.
+
+---
+
+## 5. Performance & Results
+The framework achieves a state of mathematical harmony that ensures zero impact on the external grid:
+* **Precision**: Reached a system mismatch norm of **$2.17 \times 10^{-6}$**.
+* **Stability**: Converged from a chaotic 44 kW imbalance to a perfectly flat line within 100 iterations.
+* **Synergy**: Effectively "shaves" the evening peak by using the Baker’s solar surplus to charge the School's anchor battery.
 
 
 
 ---
 
-## 4. Technical Specifications
-The models are parameterized based on technical specifications common in energy research:
-* **Power Limit**: 1.8 MW Ramp Limit.
-* **Capacity**: 2.0 MWh (with 10% - 90% SoC operational window).
-* **Efficiency**: 85% Charging / 90% Discharging.
-* **Time Step**: 1.0 Hour (Standard Day-Ahead resolution).
+## 6. How to Run
+1.  **Initialize Parameters**: Ensure the persona profiles in `coordination.py` match your neighborhood scenario.
+2.  **Run Negotiation**: 
+    ```bash
+    python src/coordination.py
+    ```
+3.  **Generate Visuals**:
+    ```bash
+    python src/postprocessing.py
+    ```
+    * `vpp_before_after.png`: Visual proof of peak reduction.
+    * `vpp_flow_heatmap.png`: The "Handshake" between solar supply and battery demand.
+    * `vpp_fuel_gauge.png`: Real-time monitoring of battery State of Charge (SoC).
 
 ---
-
-## 5. How to Run
-1.  **Generate Scenarios**: Run `src/scenarios.py` to create the representative price paths.
-2.  **Start Coordination**: Execute `python src/coordination.py`.
-3.  **Analyze Results**: Convergence logs will appear in the console, and optimized schedules will be saved to `results/`.

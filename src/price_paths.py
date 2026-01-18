@@ -40,6 +40,33 @@ def generate_scenarios(input_file, n_samples=1000, n_clusters=10):
     
     return scenario_df, samples
 
+def generate_market_scenarios(base_price_df, num_scenarios=10, volatility=0.2):
+    """
+    Takes real ENTSO-E prices and creates stochastic paths for CVaR optimization.
+    """
+    # ENTSO-E data usually comes in 1-hour or 15-min intervals
+    # Ensure we have a clean numpy array of the base prices
+    base_prices = base_price_df['price'].values
+    T = len(base_prices)
+    
+    scenarios = {}
+    time_labels = [f"t{i}" for i in range(T)]
+    
+    for s in range(num_scenarios):
+        # Create a 'Random Walk' or Gaussian noise around the real price
+        # This simulates potential market fluctuations
+        noise = np.random.normal(0, volatility * np.mean(base_prices), T)
+        scenarios[f"S{s}"] = base_prices + noise
+        
+    df_scenarios = pd.DataFrame(scenarios, index=time_labels)
+    
+    # Save for the optimization agents to read
+    os.makedirs('data/processed', exist_ok=True)
+    df_scenarios.to_csv('data/processed/representative_scenarios.csv')
+    
+    print(f"Generated {num_scenarios} scenarios based on real ENTSO-E data.")
+    return df_scenarios
+
 def plot_scenarios(representative_df, all_samples):
     plt.figure(figsize=(12, 6))
     
